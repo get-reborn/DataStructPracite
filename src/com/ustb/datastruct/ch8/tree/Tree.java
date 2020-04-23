@@ -1,91 +1,113 @@
 package com.ustb.datastruct.ch8.tree;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * This is a class about the basic node of tree
  *
  * @author re-get
- * @create 2020/4/22
  * @since 1.0.0
  */
-class Node {
-    private int iData;
-    private double dData;
-    private Node leftChild;
-    private Node rightChild;
+class Node<K, V> {
+    private K iData;
+    private V dData;
+    private Node<K, V> leftChild;
+    private Node<K, V> rightChild;
 
-    public Node(int iData, double dData) {
+    public Node(K iData, V dData) {
         this.iData = iData;
         this.dData = dData;
         this.leftChild = null;
         this.rightChild = null;
     }
 
-    public int getiData() {
+    public K getiData() {
         return iData;
     }
 
-    public void setiData(int iData) {
+    public void setiData(K iData) {
         this.iData = iData;
     }
 
-    public double getdData() {
+    public V getdData() {
         return dData;
     }
 
-    public void setdData(double dData) {
+    public void setdData(V dData) {
         this.dData = dData;
     }
 
-    public Node getLeftChild() {
+    public Node<K, V> getLeftChild() {
         return leftChild;
     }
 
-    public void setLeftChild(Node leftChild) {
+    public void setLeftChild(Node<K, V> leftChild) {
         this.leftChild = leftChild;
     }
 
-    public Node getRightChild() {
+    public Node<K, V> getRightChild() {
         return rightChild;
     }
 
-    public void setRightChild(Node rightChild) {
+    public void setRightChild(Node<K, V> rightChild) {
         this.rightChild = rightChild;
     }
 
     public void displayNode() {
-        System.out.println('{' + iData + ", " + dData + "} ");
+        System.out.println('{' + iData.toString() + ", " + dData.toString() + "} ");
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Node<?, ?> node = (Node<?, ?>) o;
+        return Objects.equals(iData, node.iData) &&
+                Objects.equals(dData, node.dData) &&
+                Objects.equals(leftChild, node.leftChild) &&
+                Objects.equals(rightChild, node.rightChild);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(iData, dData);
+    }
+
 }
 
 /**
  * This is a class about Tree DataStruct
  *
  * @author re-get
- * @create 2020/4/22
  * @since 1.0.0
  */
-public class Tree {
-    private Node root;
+public class Tree<K, V> {
+    private Node<K, V> root;
+    private final Comparator<? super K> comparator;
+    private final int MAX_BLANKS = 32;
+    private final int BLANKS_TIMES = 2;
+    private final int APPEND_BLANKS = 2;
 
-    public Tree() {
+    public Tree(Comparator<? super K> comparator) {
+        this.comparator = comparator;
         root = null;
     }
 
     /**
      * This function to find a node which iData is key
      *
-     * @param key
-     * @return
+     * @return the node to find by key
      */
-    public Node find(int key) {
-        Node current = root;
+    public Node<K, V> find(K key) {
+        Node<K, V> current = root;
         while (current != null) {
             if (current.getiData() == key) {
                 return current;
-            } else if (current.getiData() > key) {
+            } else if (this.comparator.compare(current.getiData(), key) > 0) {
                 current = current.getLeftChild();
             } else {
                 current = current.getRightChild();
@@ -97,22 +119,18 @@ public class Tree {
     /**
      * This function to insert a node into tree
      * If the id is already exist in the ree it will overwrite the node
-     *
-     * @param id
-     * @param dd
-     * @return is insert node
      */
-    public void insert(int id, double dd) {
-        Node iNode = new Node(id, dd);
+    public void insert(K id, V dd) {
+        Node<K, V> iNode = new Node<>(id, dd);
         if (root == null) {
             root = iNode;
         } else {
-            Node current = root;
+            Node<K, V> current = root;
             while (true) {
-                if (current.getiData() == id) {
+                if (this.comparator.compare(current.getiData(), id) == 0) {
                     current.setdData(dd);
                     return;
-                } else if (current.getiData() > id) {
+                } else if (this.comparator.compare(current.getiData(), id) > 0) {
                     if (current.getLeftChild() == null) {
                         current.setLeftChild(iNode);
                         return;
@@ -132,22 +150,22 @@ public class Tree {
     }
 
     /**
-     * @param key
-     * @return is the node delete
+     * @param key key is the key word to delete node
+     * @return if the node is delete
      */
-    public boolean delete(int key) {
+    public boolean delete(K key) {
         if (root == null) {
             return false;
         } else {
-            Node current = root;
-            Node currentParent = null;
-            Boolean isLeftChild = true;
+            Node<K, V> current = root;
+            Node<K, V> currentParent = null;
+            boolean isLeftChild = true;
             while (true) {
                 if (current == null) {
                     return false;
-                } else if (current.getiData() == key) {
+                } else if (this.comparator.compare(current.getiData(), key) == 0) {
                     break;
-                } else if (current.getiData() > key) {
+                } else if (this.comparator.compare(current.getiData(), key) > 0) {
                     currentParent = current;
                     current = current.getLeftChild();
                     isLeftChild = true;
@@ -194,7 +212,7 @@ public class Tree {
                 }
             } else {
                 // 4:左右节点均不为空
-                Node successor = getSuccessor(current);
+                Node<K, V> successor = getSuccessor(current);
                 successor.setLeftChild(current.getLeftChild());
                 if (currentParent == null) {
                     root = successor;
@@ -208,13 +226,48 @@ public class Tree {
         }
     }
 
+//    public List<Node<K,V>> preOrder() {
+//        List<Node<K,V>> preList = new ArrayList<>();
+//        Stack<Node<K,V>> stack = new Stack<>();
+//
+//    }
+//
+//    public List<Node<K,V>> inOrder() {
+//        List<Node<K,V>> inList = new ArrayList<>();
+//    }
+//
+//    public List<Node<K,V>> postOrder() {
+//        List<Node<K,V>> postList = new ArrayList<>();
+//    }
 
-    private Node getSuccessor(Node delNode) {
+    public List<Node<K, V>> layerOrder() {
+        List<Node<K, V>> layerList = new ArrayList<>();
+        Queue<Node<K, V>> queue = new LinkedList<>();
+        queue.offer(root);
+        while (!queue.isEmpty()) {
+            for (int i = 0, n = queue.size(); i < n; i++) {
+                Node<K, V> temp = queue.poll();
+                layerList.add(temp);
+                assert temp != null;
+                Node<K, V> leftChild = temp.getLeftChild();
+                Node<K, V> rightChild = temp.getRightChild();
+                if (leftChild != null) {
+                    queue.offer(leftChild);
+                }
+                if (rightChild != null) {
+                    queue.offer(rightChild);
+                }
+            }
+        }
+        return layerList;
+    }
+
+    private Node<K, V> getSuccessor(Node<K, V> delNode) {
         if (delNode == null) {
             throw new RuntimeException("Error: delNode is null!");
         } else {
-            Node currentParent = delNode;
-            Node current = currentParent.getRightChild();
+            Node<K, V> currentParent = delNode;
+            Node<K, V> current = currentParent.getRightChild();
             while (current.getLeftChild() != null) {
                 currentParent = current;
                 current = current.getLeftChild();
@@ -228,22 +281,21 @@ public class Tree {
     }
 
     public void displayTree() {
-        final int MAX_BLANKS = 32;
         int nBlanks = MAX_BLANKS;
         boolean isRowEmpty = false;
-        Queue<Node> queue = new LinkedList();
+        Queue<Node<K, V>> queue = new LinkedList<>();
         queue.offer(root);
-        for (int i = 0; i < MAX_BLANKS * 2 + 2; i++) {
+        for (int i = 0; i < MAX_BLANKS * BLANKS_TIMES + APPEND_BLANKS; i++) {
             System.out.print('*');
         }
         System.out.println();
-        while (isRowEmpty == false) {
+        while (!isRowEmpty) {
             isRowEmpty = true;
             for (int j = 0; j < nBlanks; j++) {
                 System.out.print(' ');
             }
             for (int i = 0, n = queue.size(); i < n; i++) {
-                Node temp = queue.poll();
+                Node<K, V> temp = queue.poll();
                 if (temp == null) {
                     System.out.print("--");
                     queue.offer(null);
@@ -254,13 +306,13 @@ public class Tree {
                     queue.offer(temp.getLeftChild());
                     queue.offer(temp.getRightChild());
                 }
-                for (int j = 0; j < nBlanks * 2 - 2; j++) {
+                for (int j = 0; j < nBlanks * BLANKS_TIMES - APPEND_BLANKS; j++) {
                     System.out.print(' ');
                 }
             }
             System.out.println();
             nBlanks /= 2;
-            for (int i = 0; i < MAX_BLANKS * 2 + 2; i++) {
+            for (int i = 0; i < MAX_BLANKS * BLANKS_TIMES + APPEND_BLANKS; i++) {
                 System.out.print('-');
             }
             System.out.println();
