@@ -1,6 +1,8 @@
 package com.ustb.datastruct.ch8.tree;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * 〈Tree Class Test〉<br>
@@ -32,13 +34,33 @@ public class TreeTest {
         theTree.insert(97, 1.3);
 
         theTree.displayTree();
-        theTree.delete(30);
-        theTree.displayTree();
-        theTree.delete(97);
-        theTree.displayTree();
-        theTree.delete(50);
-        theTree.displayTree();
-        theTree.delete(25);
-        theTree.displayTree();
+
+        System.out.println("preOrder");
+        List<Tree.Node<Integer, Double>> preList = theTree.preOrder();
+        for(Tree.Node<Integer, Double> node : preList){
+            System.out.print(node.toString());
+        }
+        System.out.println();
+
+        System.out.println("inOrder");
+        List<Tree.Node<Integer, Double>> inList = theTree.inOrder();
+        for(Tree.Node<Integer, Double> node : inList){
+            System.out.print(node.toString());
+        }
+        System.out.println();
+
+        System.out.println("postOrder");
+        List<Tree.Node<Integer, Double>> postList = theTree.postOrder();
+        for(Tree.Node<Integer, Double> node : postList){
+            System.out.print(node.toString());
+        }
+        System.out.println();
+
+        System.out.println("layerOrder");
+        List<Tree.Node<Integer, Double>> layerList = theTree.layerOrder();
+        for(Tree.Node<Integer, Double> node : layerList){
+            System.out.print(node.toString());
+        }
+        System.out.println();
     }
 }

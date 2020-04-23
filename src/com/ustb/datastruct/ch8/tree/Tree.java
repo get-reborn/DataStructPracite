@@ -1,83 +1,8 @@
 package com.ustb.datastruct.ch8.tree;
 
+import jdk.nashorn.internal.ir.WhileNode;
+
 import java.util.*;
-
-/**
- * This is a class about the basic node of tree
- *
- * @author re-get
- * @since 1.0.0
- */
-class Node<K, V> {
-    private K iData;
-    private V dData;
-    private Node<K, V> leftChild;
-    private Node<K, V> rightChild;
-
-    public Node(K iData, V dData) {
-        this.iData = iData;
-        this.dData = dData;
-        this.leftChild = null;
-        this.rightChild = null;
-    }
-
-    public K getiData() {
-        return iData;
-    }
-
-    public void setiData(K iData) {
-        this.iData = iData;
-    }
-
-    public V getdData() {
-        return dData;
-    }
-
-    public void setdData(V dData) {
-        this.dData = dData;
-    }
-
-    public Node<K, V> getLeftChild() {
-        return leftChild;
-    }
-
-    public void setLeftChild(Node<K, V> leftChild) {
-        this.leftChild = leftChild;
-    }
-
-    public Node<K, V> getRightChild() {
-        return rightChild;
-    }
-
-    public void setRightChild(Node<K, V> rightChild) {
-        this.rightChild = rightChild;
-    }
-
-    public void displayNode() {
-        System.out.println('{' + iData.toString() + ", " + dData.toString() + "} ");
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Node<?, ?> node = (Node<?, ?>) o;
-        return Objects.equals(iData, node.iData) &&
-                Objects.equals(dData, node.dData) &&
-                Objects.equals(leftChild, node.leftChild) &&
-                Objects.equals(rightChild, node.rightChild);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(iData, dData);
-    }
-
-}
 
 /**
  * This is a class about Tree DataStruct
@@ -88,9 +13,9 @@ class Node<K, V> {
 public class Tree<K, V> {
     private Node<K, V> root;
     private final Comparator<? super K> comparator;
-    private final int MAX_BLANKS = 32;
-    private final int BLANKS_TIMES = 2;
-    private final int APPEND_BLANKS = 2;
+    private static final int MAX_BLANKS = 32;
+    private static final int BLANKS_TIMES = 2;
+    private static final int APPEND_BLANKS = 2;
 
     public Tree(Comparator<? super K> comparator) {
         this.comparator = comparator;
@@ -98,19 +23,67 @@ public class Tree<K, V> {
     }
 
     /**
-     * This function to find a node which iData is key
+     * This is a class about the basic node of tree
+     *
+     * @author re-get
+     * @since 1.0.0
+     */
+    static final class Node<K, V> {
+        private K key;
+        private V value;
+        private Node<K, V> leftChild;
+        private Node<K, V> rightChild;
+
+        public Node(K key, V value) {
+            this.key = key;
+            this.value = value;
+            this.leftChild = null;
+            this.rightChild = null;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append('{').append(key.toString()).append(',').append(value.toString()).append('}');
+            return sb.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Node<?, ?> node = (Node<?, ?>) o;
+            return Objects.equals(key, node.key) &&
+                    Objects.equals(value, node.value) &&
+                    Objects.equals(leftChild, node.leftChild) &&
+                    Objects.equals(rightChild, node.rightChild);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(key, value);
+        }
+
+    }
+
+    /**
+     * This function to find a node which key is key
      *
      * @return the node to find by key
      */
     public Node<K, V> find(K key) {
         Node<K, V> current = root;
         while (current != null) {
-            if (current.getiData() == key) {
+            if (current.key == key) {
                 return current;
-            } else if (this.comparator.compare(current.getiData(), key) > 0) {
-                current = current.getLeftChild();
+            } else if (this.comparator.compare(current.key, key) > 0) {
+                current = current.leftChild;
             } else {
-                current = current.getRightChild();
+                current = current.rightChild;
             }
         }
         return null;
@@ -118,31 +91,31 @@ public class Tree<K, V> {
 
     /**
      * This function to insert a node into tree
-     * If the id is already exist in the ree it will overwrite the node
+     * If the key is already exist in the ree it will overwrite the node
      */
-    public void insert(K id, V dd) {
-        Node<K, V> iNode = new Node<>(id, dd);
+    public void insert(K key, V value) {
+        Node<K, V> iNode = new Node<>(key, value);
         if (root == null) {
             root = iNode;
         } else {
             Node<K, V> current = root;
             while (true) {
-                if (this.comparator.compare(current.getiData(), id) == 0) {
-                    current.setdData(dd);
+                if (this.comparator.compare(current.key, key) == 0) {
+                    current.value = value;
                     return;
-                } else if (this.comparator.compare(current.getiData(), id) > 0) {
-                    if (current.getLeftChild() == null) {
-                        current.setLeftChild(iNode);
+                } else if (this.comparator.compare(current.key, key) > 0) {
+                    if (current.leftChild == null) {
+                        current.leftChild = iNode;
                         return;
                     } else {
-                        current = current.getLeftChild();
+                        current = current.leftChild;
                     }
                 } else {
-                    if (current.getRightChild() == null) {
-                        current.setRightChild(iNode);
+                    if (current.rightChild == null) {
+                        current.rightChild = iNode;
                         return;
                     } else {
-                        current = current.getRightChild();
+                        current = current.rightChild;
                     }
                 }
             }
@@ -163,82 +136,137 @@ public class Tree<K, V> {
             while (true) {
                 if (current == null) {
                     return false;
-                } else if (this.comparator.compare(current.getiData(), key) == 0) {
+                } else if (this.comparator.compare(current.key, key) == 0) {
                     break;
-                } else if (this.comparator.compare(current.getiData(), key) > 0) {
+                } else if (this.comparator.compare(current.key, key) > 0) {
                     currentParent = current;
-                    current = current.getLeftChild();
+                    current = current.leftChild;
                     isLeftChild = true;
                 } else {
                     currentParent = current;
-                    current = current.getRightChild();
+                    current = current.rightChild;
                     isLeftChild = false;
                 }
             }
             // 分情况讨论
-            if (current.getLeftChild() == null
-                    && current.getRightChild() == null) {
+            if (current.leftChild == null
+                    && current.rightChild == null) {
                 // 1:子节点均为null
                 if (currentParent == null) {
                     root = null;
                 } else {
                     if (isLeftChild) {
-                        currentParent.setLeftChild(null);
+                        currentParent.leftChild = null;
                     } else {
-                        currentParent.setRightChild(null);
+                        currentParent.rightChild = null;
                     }
                 }
-            } else if (current.getLeftChild() == null) {
+            } else if (current.leftChild == null) {
                 // 2:左节点为null
                 if (currentParent == null) {
-                    root = root.getRightChild();
+                    root = root.rightChild;
                 } else {
                     if (isLeftChild) {
-                        currentParent.setLeftChild(current.getRightChild());
+                        currentParent.leftChild = current.rightChild;
                     } else {
-                        currentParent.setRightChild(current.getRightChild());
+                        currentParent.rightChild = current.rightChild;
                     }
                 }
-            } else if (current.getRightChild() == null) {
+            } else if (current.rightChild == null) {
                 // 3:右节点为null
                 if (currentParent == null) {
-                    root = root.getLeftChild();
+                    root = root.leftChild;
                 } else {
                     if (isLeftChild) {
-                        currentParent.setLeftChild(current.getLeftChild());
+                        currentParent.leftChild = current.leftChild;
                     } else {
-                        currentParent.setRightChild(current.getLeftChild());
+                        currentParent.rightChild = current.leftChild;
                     }
                 }
             } else {
                 // 4:左右节点均不为空
                 Node<K, V> successor = getSuccessor(current);
-                successor.setLeftChild(current.getLeftChild());
+                successor.leftChild = current.leftChild;
                 if (currentParent == null) {
                     root = successor;
                 } else if (isLeftChild) {
-                    currentParent.setLeftChild(successor);
+                    currentParent.leftChild = successor;
                 } else {
-                    currentParent.setRightChild(successor);
+                    currentParent.rightChild = successor;
                 }
             }
             return true;
         }
     }
 
-//    public List<Node<K,V>> preOrder() {
-//        List<Node<K,V>> preList = new ArrayList<>();
-//        Stack<Node<K,V>> stack = new Stack<>();
-//
-//    }
-//
-//    public List<Node<K,V>> inOrder() {
-//        List<Node<K,V>> inList = new ArrayList<>();
-//    }
-//
-//    public List<Node<K,V>> postOrder() {
-//        List<Node<K,V>> postList = new ArrayList<>();
-//    }
+    public List<Node<K, V>> preOrder() {
+        return preOrder(root);
+    }
+
+    public List<Node<K, V>> preOrder(Node<K, V> node) {
+        List<Node<K, V>> preList = new ArrayList<>();
+        Stack<Node<K, V>> stack = new Stack<>();
+        while (node != null || !stack.isEmpty()) {
+            while (node != null) {
+                preList.add(node);
+                stack.push(node);
+                node = node.leftChild;
+            }
+            if (!stack.isEmpty()) {
+                node = stack.pop();
+                node = node.rightChild;
+            }
+        }
+        return preList;
+    }
+
+    public List<Node<K, V>> inOrder() {
+        return inOrder(root);
+    }
+
+    public List<Node<K, V>> inOrder(Node<K, V> node) {
+        List<Node<K, V>> inList = new ArrayList<>();
+        Stack<Node<K, V>> stack = new Stack<>();
+        while (node != null || !stack.isEmpty()) {
+            while (node != null) {
+                stack.add(node);
+                node = node.leftChild;
+            }
+            if (!stack.isEmpty()) {
+                node = stack.pop();
+                inList.add(node);
+                node = node.rightChild;
+            }
+        }
+        return inList;
+    }
+
+    public List<Node<K, V>> postOrder() {
+        return postOrder(root);
+    }
+
+    public List<Node<K, V>> postOrder(Node<K, V> node) {
+        List<Node<K, V>> postList = new ArrayList<>();
+        Stack<Node<K, V>> stack = new Stack<>();
+        Stack<Boolean> flagStack = new Stack<>();
+        while (node != null || !stack.isEmpty()) {
+            while (node != null) {
+                stack.push(node);
+                flagStack.push(false);
+                node = node.leftChild;
+            }
+            while (!stack.isEmpty() && flagStack.peek()) {
+                postList.add(stack.pop());
+                flagStack.pop();
+            }
+            if (!stack.isEmpty()) {
+                flagStack.pop();
+                flagStack.push(true);
+                node = stack.peek().rightChild;
+            }
+        }
+        return postList;
+    }
 
     public List<Node<K, V>> layerOrder() {
         List<Node<K, V>> layerList = new ArrayList<>();
@@ -249,8 +277,8 @@ public class Tree<K, V> {
                 Node<K, V> temp = queue.poll();
                 layerList.add(temp);
                 assert temp != null;
-                Node<K, V> leftChild = temp.getLeftChild();
-                Node<K, V> rightChild = temp.getRightChild();
+                Node<K, V> leftChild = temp.leftChild;
+                Node<K, V> rightChild = temp.rightChild;
                 if (leftChild != null) {
                     queue.offer(leftChild);
                 }
@@ -263,21 +291,17 @@ public class Tree<K, V> {
     }
 
     private Node<K, V> getSuccessor(Node<K, V> delNode) {
-        if (delNode == null) {
-            throw new RuntimeException("Error: delNode is null!");
-        } else {
-            Node<K, V> currentParent = delNode;
-            Node<K, V> current = currentParent.getRightChild();
-            while (current.getLeftChild() != null) {
-                currentParent = current;
-                current = current.getLeftChild();
-            }
-            if (current != delNode.getRightChild()) {
-                currentParent.setLeftChild(current.getRightChild());
-                current.setRightChild(delNode.getRightChild());
-            }
-            return current;
+        Node<K, V> currentParent = delNode;
+        Node<K, V> current = currentParent.rightChild;
+        while (current.leftChild != null) {
+            currentParent = current;
+            current = current.leftChild;
         }
+        if (current != delNode.rightChild) {
+            currentParent.leftChild = current.rightChild;
+            current.rightChild = delNode.rightChild;
+        }
+        return current;
     }
 
     public void displayTree() {
@@ -302,9 +326,9 @@ public class Tree<K, V> {
                     queue.offer(null);
                 } else {
                     isRowEmpty = false;
-                    System.out.print(temp.getiData());
-                    queue.offer(temp.getLeftChild());
-                    queue.offer(temp.getRightChild());
+                    System.out.print(temp.key);
+                    queue.offer(temp.leftChild);
+                    queue.offer(temp.rightChild);
                 }
                 for (int j = 0; j < nBlanks * BLANKS_TIMES - APPEND_BLANKS; j++) {
                     System.out.print(' ');
